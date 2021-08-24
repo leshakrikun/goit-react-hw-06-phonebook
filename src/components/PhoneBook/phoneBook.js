@@ -1,21 +1,20 @@
-import {React, useState, useContext} from 'react';
-import s from './phonebook.module.css';
-import { PhoneContext } from '../../App.js'
+import {React, useState} from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import {useDispatch} from 'react-redux'
-import {addContact} from '../../redux/actions.js'
+import {useDispatch, useSelector} from 'react-redux'
+import { contactsSlice } from '../../redux/store';
+import s from './phonebook.module.css';
 
 
 const Phonebook = () => {
   const dispatch = useDispatch();
+  const state = useSelector((state) => state)
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-  const {/* dispatch ,*/ state} = useContext(PhoneContext)
   const { contacts } = state
 
   const handleChange = e => {
     const {name, value} = e.target;
-    /* setContact({...contact, [name]: value }) */
+   
     switch (name) {
       case 'name':
         setName(value);
@@ -32,19 +31,17 @@ const Phonebook = () => {
 
   const handleSubmit = e => {
     e.preventDefault();
-    if (contacts){
-      state.result = contacts.find(state  => name === state.name );
-    } 
-    if(state.result){
+    
+    const result = contacts.find(state  => name === state.name ); 
+    if(result){
       alert(name + ` is already in contact`)
-      setName('')
-      setNumber('')
     }
     else {
-      dispatch(addContact({name, number, id: uuidv4()}))
-      setName('')
-      setNumber('')
-  }}
+      dispatch(contactsSlice.actions.addContacts({name, number, id: uuidv4()}))
+    } 
+    setName('')
+    setNumber('')
+  }
 
   return (
     <div className={s.phonebook}>
@@ -71,10 +68,10 @@ const Phonebook = () => {
       title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
       required
     />
-    <button type="submit">Add contact</button>
+    <button type="submit" className={s.phoneBookButton}>Add contact</button>
     </form>
     </div>
     </div>
   )
 }
-  export default Phonebook
+export default Phonebook

@@ -1,54 +1,49 @@
-import {createStore, applyMiddleware} from 'redux'
-import { devToolsEnhancer} from 'redux-devtools-extension'
-import {types} from './types'
-/* const reducer = (state = {}, action) => {
-    console.log('log action in reducer: ', action);    
-    return state;
-}; */
-const initialState = {
-    contacts: JSON.parse(window.localStorage.getItem('contacts')) ?? [],
-    filter: '',
-    result:'',
-}
-/* 
-const reducerContacts = (state = initialState, {type, payload}) => {
-    switch (type) {
-      case 'addContact':
-        return {...state, contacts:[...state.contacts, payload]};
-      case 'deleteContact':
-        return {...state, contacts:[...state.contacts.filter((state) => state.id !== payload.id)]};
-      case 'filterContact':
-        return {...state, filter: payload};
-      default:
-        return state
-    };
-}; */
-const handlers = {
-    [types.ADD_CONTACTS]: (state, actions) => ({
-        ...state,
-        contacts: [...state.contacts, actions.payload],
-    }),
+import { configureStore, createSlice, getDefaultMiddleware } from '@reduxjs/toolkit'
+import { persistStore, persistReducer,
+    FLUSH,
+    REHYDRATE,
+    PAUSE,
+    PERSIST,
+    PURGE,
+    REGISTER } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
-    [types.DELETE_CONTACT]: (state, actions) => ({
-        ...state, contacts: [...state.contacts.filter((state) => state.id !== actions.payload)]}),
+const persistConfig = {
+    key: 'contacts',
+    storage,
+    blacklist: ['filter']
+  }
 
+const initialState = { contacts: JSON.parse(window.localStorage.getItem('contacts')) ?? [], }
 
-        /* [deleteContact]: (state, action) =>
-        state.filter((element) => element.id !== action.payload), 
-    });   */
+export const contactsSlice = createSlice({
+  name: 'contacts',
+  initialState,
+  reducers: {
+    addContacts(state, action) {
+        return {...state, contacts:[...state.contacts, action.payload]};
+    },
+    deleteContact(state, action) {
+        return {...state, contacts:[...state.contacts.filter((state) => state.id !== action.payload)]};
+    },
+    filterContact(state, action) {
+        return {...state, filter: action.payload};
+    }
+   },
+})
 
+const middleware = [...getDefaultMiddleware({
+    serializableCheck: {
+      ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+    },
+  }),
 
+]
 
-    default: (state) => state,
-};
+const store = configureStore({ reducer: 
+    persistReducer(persistConfig, contactsSlice.reducer),
+    middleware,
+});
+const persistor = persistStore(store)
 
-const reducerContacts = (state = initialState, actions) => {
-    const handler = handlers[actions.type] || handlers.default;
-    return handler(state, actions);
-};
-
-
-
-
-const store = createStore(reducerContacts, devToolsEnhancer())
-export default store 
+export  { store, persistor };
