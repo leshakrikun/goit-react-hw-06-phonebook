@@ -1,6 +1,7 @@
 .contactItem__btn {
   display: inline-block;
   margin-left: 10px;
+  margin-top: 10px;
 }
 .contactList {
   margin-left: auto;

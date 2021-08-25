@@ -1,4 +1,4 @@
-import {contactsSlice} from '../../redux/store'
+import {contactsSlice} from '../../redux/reducer'
 import {useDispatch} from 'react-redux'
 import s from './contacts.module.css';
 
